@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:reminder/dialog_screen.dart';
 
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as time;
@@ -40,6 +42,35 @@ class NotificationService {
     );
   }
 
+  void editTask(
+      DocumentSnapshot taskDoc,
+      BuildContext context,
+      TextEditingController taskController,
+      TextEditingController descriptionController,
+      TextEditingController pickedTimeController,
+      TimeOfDay? selectedTime) async {
+    var taskData = taskDoc.data() as Map<String, dynamic>;
+
+    taskController.text = taskData['task'];
+    descriptionController.text = taskData['description'];
+    Timestamp timestamp = taskData['time'];
+    DateTime localTime = timestamp.toDate();
+    selectedTime = TimeOfDay(hour: localTime.hour, minute: localTime.minute);
+    pickedTimeController.text = "${localTime.hour}:${localTime.minute}";
+    FocusScope.of(context).unfocus();
+    showDialog(
+      context: context,
+      builder: (context) => DialogScreen(
+        taskDoc: taskDoc,
+        taskController: taskController,
+        descriptionController: descriptionController,
+        pickedTimeController: pickedTimeController,
+        selectedTime: selectedTime,
+        localTime: localTime,
+      ),
+    );
+  }
+
   NotificationDetails notificationDetails() {
     return const NotificationDetails(
       android: AndroidNotificationDetails(
@@ -47,7 +78,7 @@ class NotificationService {
         'notifications',
         icon: "@mipmap/ic_launcher",
         channelDescription: "channel_description",
-        importance: Importance.high,
+        importance: Importance.max,
         priority: Priority.high,
         playSound: true,
       ),
@@ -99,8 +130,8 @@ class NotificationService {
 
       NotificationService().scheduledNotification(
         id: docId.hashCode,
-        title: taskData['task'],
-        body: taskData['description'],
+        title:" taskData['task']",
+        body: "taskData['description']",
         hour: hour,
         minute: minute,
       );

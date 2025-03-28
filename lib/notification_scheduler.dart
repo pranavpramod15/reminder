@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:reminder/dialog_screen.dart';
 import 'package:reminder/fcm_service.dart';
+import 'package:reminder/noti_service.dart';
 
 class NotificationScheduler extends StatefulWidget {
   const NotificationScheduler({super.key});
@@ -106,11 +106,12 @@ class _NotificationSchedulerState extends State<NotificationScheduler> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () => editTask(
+                            onPressed: () => NotificationService().editTask(
                                 taskDoc,
                                 context,
                                 taskController,
                                 descriptionController,
+                                pickedTimeController,
                                 selectedTime),
                           ),
                           IconButton(
@@ -128,34 +129,6 @@ class _NotificationSchedulerState extends State<NotificationScheduler> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void editTask(
-      DocumentSnapshot taskDoc,
-      BuildContext context,
-      TextEditingController taskController,
-      TextEditingController descriptionController,
-      TimeOfDay? selectedTime) async {
-    var taskData = taskDoc.data() as Map<String, dynamic>;
-
-    taskController.text = taskData['task'];
-    descriptionController.text = taskData['description'];
-    Timestamp timestamp = taskData['time'];
-    DateTime localTime = timestamp.toDate();
-    selectedTime = TimeOfDay(hour: localTime.hour, minute: localTime.minute);
-    pickedTimeController.text = "${localTime.hour}:${localTime.minute}";
-    FocusScope.of(context).unfocus();
-    showDialog(
-      context: context,
-      builder: (context) => DialogScreen(
-        taskDoc: taskDoc,
-        taskController: taskController,
-        descriptionController: descriptionController,
-        pickedTimeController: pickedTimeController,
-        selectedTime: selectedTime,
-        localTime: localTime,
       ),
     );
   }
